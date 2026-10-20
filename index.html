@@ -68,6 +68,40 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
  .box .grid{grid-template-columns:repeat(2,1fr)}
  .btn{min-height:42px}
 }
+
+:root{--r:12px;--ok:#3ddc97;--acc2:#1f9fc4}
+body{background:radial-gradient(900px 420px at 50% -140px,#12354d,transparent),var(--bg);background-attachment:fixed}
+header{background:#0c1a26e6;backdrop-filter:blur(10px)}
+.btn{background:linear-gradient(180deg,#3cc6e8,var(--acc2));border-radius:10px;transition:filter .15s,transform .08s}
+.btn:active,.chip:active{transform:scale(.96)}
+.btn.g{background:#1b3548}.btn.d{background:#3b2230}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.card{background:linear-gradient(180deg,#183147,#112436);border-radius:var(--r);transition:transform .15s,border-color .15s,box-shadow .15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 18px #0008}
+.card.sel{outline:2px solid var(--acc);background:linear-gradient(180deg,#1d4560,#133046)}
+.card .r{font-size:10px;letter-spacing:.5px;text-transform:uppercase}
+.box{background:linear-gradient(180deg,#112332,#0e1d2a);border-radius:16px}
+.bh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.bh h2{margin:0}
+.calc{font-size:12px;color:var(--mut);min-height:34px;max-width:300px}
+.prs{display:flex;gap:6px;align-items:flex-start;justify-content:center}
+.prs .bar{margin:0;justify-content:center}
+.gear{font-size:18px;padding:6px 12px;border-color:var(--line)}
+#needle{transition:none!important}
+.wheel.win .ctr b{color:var(--ok)}.wheel.lose .ctr b{color:var(--bad)}
+.wheel.win,.wheel.lose{animation:pop .45s}
+@keyframes pop{40%{transform:scale(1.04)}}
+#modal{position:fixed;inset:0;background:#000b;z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+#modal[hidden]{display:none}
+.mp{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;width:min(440px,100%);max-height:88vh;overflow:auto}
+.mp h3{font-size:14px;color:var(--mut);margin:14px 0 6px}
+.prow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.prow input[type=text]{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px 12px}
+.prow input[type=range]{width:100%}
+input[type=search],.mp input[type=text]{font-size:16px}
+@media(max-width:1100px){.mid{order:-1}}
+@media(max-width:700px){.up{grid-template-columns:1fr 1fr}.mid{grid-column:1/-1;position:static}.box .grid{grid-template-columns:1fr}.box{max-height:55vh;padding:10px}.card .n{font-size:12px}}
+@media(max-width:340px){.up{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -79,7 +113,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
     <button data-t="inv">Инвентарь</button>
     <button data-t="up">Апгрейд</button>
   </nav>
-  <div class="bal"><span><span id="bal">0</span> ₽</span><button class="btn" id="top">+5 000 ₽ бесплатно</button></div>
+  <button class="btn g" id="snd" aria-label="Звук">🔊</button><div class="bal"><span><span id="bal">0</span> ₽</span><button class="btn" id="top">+5 000 ₽ бесплатно</button></div>
 </header>
 <main>
   <section id="shop" class="on">
@@ -96,29 +130,52 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
   </section>
   <section id="up">
     <div class="up">
-      <div class="box"><h2>Твои скины</h2><div class="grid" id="upinv"></div></div>
+      <div class="box"><div class="bh"><h2>Отдаёшь</h2><button class="chip" id="clr">Сбросить</button></div><div class="grid" id="upinv"></div></div>
       <div class="mid">
-        <div class="wheel">
+        <div class="wheel" id="wheel">
           <svg viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="90" fill="none" stroke="#1d3a50" stroke-width="12"/>
-            <circle id="arc" cx="100" cy="100" r="90" fill="none" stroke="#29b6d9" stroke-width="12" transform="rotate(-90 100 100)" stroke-dasharray="0 600"/>
-            <g id="needle" style="transform-origin:100px 100px"><polygon points="100,2 94,22 106,22" fill="#fff"/></g>
+            <defs><radialGradient id="hub" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#1d3b52"/><stop offset="1" stop-color="#0a1620"/></radialGradient></defs>
+            <circle cx="100" cy="100" r="97" fill="#0c1a26" stroke="#2a4b63" stroke-width="2"/>
+            <g id="ticks" stroke="#3b6580" stroke-width="1.2"></g>
+            <circle cx="100" cy="100" r="82" fill="none" stroke="#162f43" stroke-width="10"/>
+            <circle id="arc" cx="100" cy="100" r="82" fill="none" stroke="#29b6d9" stroke-width="10" transform="rotate(-90 100 100)" stroke-dasharray="0 600"/>
+            <circle cx="100" cy="100" r="68" fill="url(#hub)" stroke="#27475d" stroke-width="2"/>
+            <circle cx="100" cy="100" r="62" fill="none" stroke="#1b3548" stroke-width="1"/>
+            <g id="needle" style="transform-origin:100px 100px"><line x1="100" y1="100" x2="100" y2="30" stroke="#fff" stroke-width="2.5"/><polygon points="100,9 92,31 108,31" fill="#fff" stroke="#0a141c" stroke-width="1.5" stroke-linejoin="round"/><circle cx="100" cy="100" r="8" fill="#1f9fc4" stroke="#fff" stroke-width="2"/></g>
           </svg>
           <div class="ctr"><b id="pc">0%</b><small>шанс</small></div>
         </div>
         <div class="pair"><div>Ставка: <b id="sumv">0 ₽</b></div><div>Цель: <b id="tgv">0 ₽</b></div></div>
+        <div class="calc" id="calc"></div>
+        <div class="prs"><div class="bar" id="mbar"></div><button class="chip gear" id="gear" aria-label="Настройки апгрейда">⚙︎</button></div>
         <button class="btn" id="go" style="padding:12px 40px;font-size:16px">АПГРЕЙД</button>
         <div id="res"></div>
       </div>
-      <div class="box"><h2>Цель</h2>
+      <div class="box"><div class="bh"><h2>Получаешь</h2></div>
         <div class="bar"><input type="search" id="uq" placeholder="Поиск цели…"></div>
-        <div class="bar" id="mbar"></div><div class="grid" id="uptg"></div>
+        <div class="grid" id="uptg"></div>
         <button class="btn g more" id="upmore">Показать ещё</button>
       </div>
     </div>
   </section>
 </main>
 <footer>GLACIER.UP — учебный симулятор. Виртуальные рубли ₽ не имеют ценности, настоящих денег и вывода нет. Цены в игре условные. Скины © Valve, сайт не связан с Valve.</footer>
+<div id="modal" hidden role="dialog" aria-modal="true" aria-label="Настройки апгрейда">
+ <div class="mp">
+  <div class="bh"><h2>Настройки апгрейда</h2><button class="btn g" data-close aria-label="Закрыть">✕</button></div>
+  <h3>Быстрые множители (сортируются по возрастанию)</h3>
+  <div id="plist"></div>
+  <div class="prow"><input type="text" id="padd" inputmode="decimal" placeholder="Новый, напр. 7"><button class="btn" id="paddb">Добавить</button></div>
+  <h3>Свой множитель или желаемый шанс</h3>
+  <div class="prow"><input type="text" id="cm" inputmode="decimal" placeholder="Множитель, напр. 4.5"><button class="btn" id="cmb">Применить</button></div>
+  <div class="prow"><input type="text" id="cc" inputmode="decimal" placeholder="Шанс, % (напр. 30)"><button class="btn" id="ccb">Применить</button></div>
+  <div id="perr" class="lose" style="min-height:20px;font-size:13px"></div>
+  <h3>Звук</h3>
+  <label class="prow"><input type="checkbox" id="sndon"> Включён</label>
+  <div class="prow"><input type="range" id="vol" min="0" max="100" aria-label="Громкость"></div>
+  <button class="btn d" id="preset-reset" style="width:100%;margin-top:10px">Сбросить настройки апгрейда</button>
+ </div>
+</div>
 <div id="toast"></div>
 <script src="prices.js"></script>
 <script>
@@ -151,6 +208,48 @@ const Prices=(()=>{
     return best;
   }
   return {load};
+})();
+
+// ---- sound: синтез через Web Audio, файлов нет; включается после первого касания
+const Snd=(()=>{
+  let ctx=null,out=null,on=true,vol=.5;
+  try{const p=JSON.parse(localStorage.getItem("glacierup_snd"));if(p){on=!!p.on;vol=Math.min(1,Math.max(0,+p.vol||0))}}catch(e){}
+  const persist=()=>{try{localStorage.setItem("glacierup_snd",JSON.stringify({on,vol}))}catch(e){}};
+  function init(){
+    if(!ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return;ctx=new A();out=ctx.createGain();out.gain.value=vol;out.connect(ctx.destination)}
+    if(ctx.state==="suspended")ctx.resume();
+  }
+  ["pointerdown","keydown"].forEach(ev=>addEventListener(ev,init,{passive:true}));
+  const ok=()=>on&&vol>0&&ctx&&ctx.state==="running";
+  function tone(f,d,type="sine",v=.2,f2,dl=0){
+    if(!ok())return;const t=ctx.currentTime+dl,o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.02);
+  }
+  function whoosh(ms){ // шум с полосовым фильтром: разгон -> замедление
+    if(!ok())return;const d=ms/1000,n=Math.floor(ctx.sampleRate*d),b=ctx.createBuffer(1,n,ctx.sampleRate),a=b.getChannelData(0);
+    for(let i=0;i<n;i++)a[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain(),t=ctx.currentTime;
+    src.buffer=b;fl.type="bandpass";fl.Q.value=1.2;
+    fl.frequency.setValueAtTime(300,t);fl.frequency.linearRampToValueAtTime(1800,t+d*.2);fl.frequency.exponentialRampToValueAtTime(250,t+d);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+d*.15);g.gain.linearRampToValueAtTime(0,t+d);
+    src.connect(fl);fl.connect(g);g.connect(out);src.start(t);
+  }
+  return{
+    get on(){return on},get vol(){return vol},
+    setOn(v){on=!!v;persist();if(on)init()},
+    setVol(v){vol=Math.min(1,Math.max(0,v));if(out)out.gain.value=vol;persist()},
+    click:()=>tone(900,.04,"triangle",.07,600),
+    sel:()=>tone(520,.07,"sine",.1,780),
+    buy:()=>{tone(660,.08,"triangle",.1);tone(990,.1,"triangle",.1,null,.07)},
+    modal:()=>tone(420,.09,"sine",.08,640),
+    tick:v=>tone(1100+700*v,.03,"square",.03+.04*v),
+    start:()=>tone(180,.3,"sawtooth",.1,460),
+    whoosh,
+    win:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.28,"triangle",.14,null,i*.09)),
+    lose:()=>{tone(220,.45,"sawtooth",.12,80);tone(150,.5,"square",.05,60,.1)}
+  };
 })();
 
 // ---- catalog
@@ -207,10 +306,10 @@ async function load(){
 $("#retry").onclick=load;
 
 function card(s,opt={}){
-  return `<div class="card ${opt.sel?"sel":""}" style="--rc:${RC[s.t]}" data-id="${esc(s.id)}" ${opt.uid?`data-uid="${opt.uid}"`:""}><div class="im"><img src="${esc(s.img)}" alt="" loading="lazy" decoding="async"></div><div class="w">${esc(s.w)}</div><div class="n">${esc(s.n)}</div><div class="p">${f(s.p)}</div>${opt.act||""}</div>`;
+  return `<div class="card ${opt.sel?"sel":""}" style="--rc:${RC[s.t]}" data-id="${esc(s.id)}" ${opt.uid?`data-uid="${opt.uid}"`:""}><div class="im"><img src="${esc(s.img)}" alt="" loading="lazy" decoding="async"></div><div class="w">${esc(s.w)}</div><div class="n">${esc(s.n)}</div><div class="r" style="color:${RC[s.t]}">${RAR[s.t]}</div><div class="p">${f(s.p)}</div>${opt.act||""}</div>`;
 }
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button,main>section").forEach(e=>e.classList.remove("on"));b.classList.add("on");$("#"+b.dataset.t).classList.add("on");render()});
-$("#top").onclick=()=>{st.bal+=5000;save();render();toast("+5 000 ₽ — виртуальные, бесплатно")};
+$("#top").onclick=()=>{st.bal+=5000;save();render();toast("+5 000 ₽ — виртуальные, бесплатно");Snd.buy()};
 
 // ---- shop
 let shopRar=-1,shopSort=1,shopLim=48,shopQ="";
@@ -230,7 +329,7 @@ $("#shopgrid").onclick=e=>{
   const b=e.target.closest("[data-buy]");if(!b)return;
   const s=sk(b.dataset.buy);if(!s)return;
   if(st.bal<s.p)return toast("Не хватает ₽ — пополни баланс бесплатно");
-  st.bal-=s.p;st.inv.push({id:st.nid++,s:s.id});save();$("#bal").textContent=st.bal.toLocaleString("ru-RU");toast("Куплено: "+s.w+" | "+s.n);
+  st.bal-=s.p;st.inv.push({id:st.nid++,s:s.id});save();$("#bal").textContent=st.bal.toLocaleString("ru-RU");toast("Куплено: "+s.w+" | "+s.n);Snd.buy();
 };
 
 // ---- inventory
@@ -242,58 +341,132 @@ function renderInv(){
 $("#invgrid").onclick=e=>{
   const b=e.target.closest("[data-sell]");if(!b)return;
   const id=+b.dataset.sell,x=st.inv.find(v=>v.id==id);if(!x)return;
-  const p=sk(x.s).p;st.bal+=p;st.inv=st.inv.filter(v=>v.id!=id);save();render();toast("Продано за "+f(p));
+  const p=sk(x.s).p;st.bal+=p;st.inv=st.inv.filter(v=>v.id!=id);save();render();toast("Продано за "+f(p));Snd.buy();
 };
 $("#sellall").onclick=()=>{const t=st.inv.reduce((a,x)=>a+sk(x.s).p,0);st.bal+=t;st.inv=[];save();render();toast("Продано всё за "+f(t))};
 
 // ---- upgrade
-let sel=new Set(),tgt=null,busy=false,mult=0,rot=0,upLim=48,upQ="";
+// Модель: теория = ставка / цена цели; шанс = теория * (1 - edge), в пределах [minP, maxP].
+// Тот же шанс рисуется на колесе и используется в розыгрыше.
+const CFG={edge:.05,minP:1,maxP:75,minM:1.2,maxM:90,maxPresets:8,spinMs:5200,turns:6,defPresets:[2,3,5,10,20]};
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const okM=v=>typeof v=="number"&&isFinite(v)&&v>=CFG.minM&&v<=CFG.maxM;
+const num=v=>{v=String(v).trim().replace(",",".");return /^\d+(\.\d+)?$/.test(v)?Number(v):NaN};
+const norm=a=>[...new Set(a.map(v=>+v.toFixed(2)))].sort((x,y)=>x-y);
+const savePresets=()=>{try{localStorage.setItem("glacierup_presets",JSON.stringify(presets))}catch(e){}};
+let presets=(()=>{try{const a=JSON.parse(localStorage.getItem("glacierup_presets"));if(Array.isArray(a)&&a.length&&a.length<=CFG.maxPresets&&a.every(okM))return norm(a)}catch(e){}return CFG.defPresets.slice()})();
+let sel=new Set(),tgt=null,busy=false,mult=0,rot=0,upLim=48,upQ="",lock=null;
 const sumSel=()=>st.inv.filter(x=>sel.has(x.id)).reduce((a,x)=>a+sk(x.s).p,0);
-const chanceOf=()=>{const s=sumSel();return tgt&&s>0?Math.min(75,s/sk(tgt).p*95):0};
-function renderUp(){
-  sel=new Set([...sel].filter(id=>st.inv.some(x=>x.id==id)));
-  if(tgt&&!sk(tgt))tgt=null;
-  $("#upinv").innerHTML=st.inv.map(x=>card(sk(x.s),{uid:x.id,sel:sel.has(x.id)})).join("")||'<div class="empty">Нет скинов. Купи в магазине.</div>';
-  renderTargets();updWheel();
+function calc(){
+  const s=sumSel(),t=tgt?sk(tgt):null;
+  if(!t||!(t.p>0)||!(s>0))return{s,t,theory:0,chance:0,ok:false};
+  const theory=s/t.p*100,chance=Math.min(CFG.maxP,theory*(1-CFG.edge));
+  return{s,t,theory,chance,ok:t.p>s&&chance>=CFG.minP};
+}
+function targetList(){
+  const s=sumSel(),q=upQ.toLowerCase();
+  let l=S.filter(t=>(!s||t.p>s)&&(!q||(t.w+" "+t.n).toLowerCase().includes(q)));
+  if(s&&mult>0){ // ближайшие к ставке*множитель
+    const want=s*mult;l.sort((a,b)=>Math.abs(a.p-want)-Math.abs(b.p-want));
+    const near=l.filter(t=>Math.abs(t.p-want)<=want*.2);if(near.length)l=near;
+  }
+  return l;
+}
+function autoTarget(){const l=targetList();if(mult>0&&sumSel()>0&&l.length)tgt=l[0].id}
+function renderPresets(){
+  const ex=mult>0&&!presets.some(m=>Math.abs(m-mult)<1e-9);
+  const L=[["Все",0],...presets.map(m=>["x"+m,m])];if(ex)L.push(["≈x"+(+mult.toFixed(2)),mult]);
+  $("#mbar").innerHTML=L.map(m=>`<button class="chip ${Math.abs(mult-m[1])<1e-9?"on":""}" data-m="${m[1]}">${m[0]}</button>`).join("");
 }
 function renderTargets(){
-  const s=sumSel(),q=upQ.toLowerCase();
-  $("#mbar").innerHTML=[["Все",0],["x2",2],["x3",3],["x5",5],["x10",10],["x20",20]].map(m=>`<button class="chip ${mult==m[1]?"on":""}" data-m="${m[1]}">${m[0]}</button>`).join("");
-  let l=S.filter(t=>(!s||t.p>s)&&(!q||(t.w+" "+t.n).toLowerCase().includes(q)));
-  if(s&&mult>0){
-    const want=s*mult;
-    l.sort((a,b)=>Math.abs(a.p-want)-Math.abs(b.p-want));
-    const near=l.filter(t=>Math.abs(t.p-want)<=want*0.2);
-    if(near.length)l=near;
-  }
+  const s=sumSel(),l=targetList();
   $("#uptg").innerHTML=l.slice(0,upLim).map(t=>card(t,{sel:tgt==t.id,act:s?`<div class="mx">x${(t.p/s).toFixed(2)}</div>`:""})).join("")||'<div class="empty">Нет подходящих целей</div>';
   $("#upmore").style.display=l.length>upLim?"":"none";
 }
-function updWheel(){
-  const c=chanceOf(),C=2*Math.PI*90;
-  $("#arc").setAttribute("stroke-dasharray",`${C*c/100} ${C}`);
-  $("#pc").textContent=c.toFixed(c%1?2:0)+"%";
-  $("#sumv").textContent=f(sumSel());$("#tgv").textContent=f(tgt?sk(tgt).p:0);
-  $("#go").disabled=!(!busy&&sumSel()>0&&tgt&&sk(tgt).p>sumSel()&&c>=1);
+function renderUp(){
+  if(!busy)sel=new Set([...sel].filter(id=>st.inv.some(x=>x.id==id)));
+  if(tgt&&!sk(tgt))tgt=null;
+  $("#upinv").innerHTML=st.inv.map(x=>card(sk(x.s),{uid:x.id,sel:sel.has(x.id)})).join("")||'<div class="empty">Нет скинов. Купи в магазине.</div>';
+  renderPresets();renderTargets();updWheel();
 }
-$("#upinv").onclick=e=>{if(busy)return;const c=e.target.closest(".card");if(!c)return;const id=+c.dataset.uid;sel.has(id)?sel.delete(id):sel.add(id);c.classList.toggle("sel");$("#res").textContent="";renderTargets();updWheel()};
-$("#uptg").onclick=e=>{if(busy)return;const c=e.target.closest(".card");if(!c)return;const id=c.dataset.id;tgt=tgt==id?null:id;$("#res").textContent="";renderTargets();updWheel()};
-$("#mbar").onclick=e=>{const b=e.target.closest("button");if(!b)return;mult=+b.dataset.m;upLim=48;renderTargets()};
+function updWheel(){
+  const c=lock||calc(),C=2*Math.PI*82;
+  $("#arc").setAttribute("stroke-dasharray",`${C*c.chance/100} ${C}`);
+  $("#pc").textContent=c.chance.toFixed(c.chance%1?2:0)+"%";
+  $("#sumv").textContent=f(c.s);$("#tgv").textContent=f(c.t?c.t.p:0);
+  $("#calc").textContent=c.chance?`Множитель x${(c.t.p/c.s).toFixed(2)} · теория ${c.theory.toFixed(2)}% − комиссия ${+(CFG.edge*100).toFixed(1)}% = шанс ${c.chance.toFixed(2)}%${c.theory*(1-CFG.edge)>CFG.maxP?" (лимит "+CFG.maxP+"%)":""}`:"Выбери скины слева и цель справа";
+  $("#go").disabled=busy||!c.ok;
+}
+const afterPick=()=>{$("#res").textContent="";$("#wheel").classList.remove("win","lose");autoTarget();renderTargets();updWheel()};
+$("#upinv").onclick=e=>{if(busy)return;const c=e.target.closest(".card");if(!c)return;const id=+c.dataset.uid;sel.has(id)?sel.delete(id):sel.add(id);c.classList.toggle("sel");Snd.sel();afterPick()};
+$("#uptg").onclick=e=>{if(busy)return;const c=e.target.closest(".card");if(!c)return;const id=c.dataset.id;tgt=tgt==id?null:id;Snd.sel();$("#res").textContent="";renderTargets();updWheel()};
+$("#clr").onclick=()=>{if(busy)return;sel.clear();tgt=null;mult=0;$("#res").textContent="";renderUp()};
+$("#mbar").onclick=e=>{const b=e.target.closest("button");if(!b||busy)return;mult=+b.dataset.m;upLim=48;if(!sumSel()&&mult>0)toast("Сначала выбери скины, которые отдаёшь");afterPick();renderPresets()};
 $("#uq").oninput=e=>{upQ=e.target.value;upLim=48;renderTargets()};
 $("#upmore").onclick=()=>{upLim+=48;renderTargets()};
-$("#go").onclick=()=>{
-  if($("#go").disabled)return;
-  busy=true;updWheel();$("#res").textContent="";
-  const c=chanceOf(),roll=Math.random()*100,win=roll<c,t=tgt,used=[...sel];
-  rot=rot-rot%360+360*6+roll*3.6;
-  $("#needle").style.transform=`rotate(${rot}deg)`;
-  setTimeout(()=>{
-    st.inv=st.inv.filter(x=>!used.includes(x.id));
-    if(win){st.inv.push({id:st.nid++,s:t});const s=sk(t);$("#res").innerHTML=`<span class="win">ПОБЕДА! ${esc(s.w)} | ${esc(s.n)}</span>`;tgt=null}
-    else $("#res").innerHTML=`<span class="lose">Не повезло. Скины сгорели.</span>`;
-    sel.clear();busy=false;save();render();
-  },4400);
+
+// анимация: результат уже известен, колесо лишь показывает его. Скорость: разгон -> долгое замедление
+const ease=t=>{const a=Math.min(1,t/.12);return(1-Math.pow(1-t,4))*(a*a*(3-2*a))};
+function spin(from,to,ms){
+  return new Promise(res=>{
+    const t0=performance.now(),nd=$("#needle");let last=Math.floor(from/15),lt=0;
+    (function fr(now){
+      const t=Math.min(1,(now-t0)/ms),a=from+(to-from)*ease(t),k=Math.floor(a/15);
+      nd.style.transform=`rotate(${a}deg)`;
+      if(k!==last){last=k;if(now-lt>40){lt=now;Snd.tick(1-t)}}
+      t<1?requestAnimationFrame(fr):res();
+    })(t0);
+  });
+}
+$("#go").onclick=async()=>{
+  const c=calc();if(busy||!c.ok)return;
+  busy=true;lock=c;updWheel();$("#res").textContent="";$("#wheel").classList.remove("win","lose");
+  const roll=Math.random()*100,win=roll<c.chance,used=[...sel];
+  st.inv=st.inv.filter(x=>!used.includes(x.id));          // итог фиксируется и сохраняется ДО анимации
+  if(win)st.inv.push({id:st.nid++,s:c.t.id});
+  save();
+  const from=rot,ms=RM?1500:CFG.spinMs;
+  rot=rot-rot%360+360*(RM?2:CFG.turns)+roll*3.6;
+  Snd.start();Snd.whoosh(ms);
+  await spin(from,rot,ms);
+  $("#res").innerHTML=win?`<span class="win">ПОБЕДА! ${esc(c.t.w)} | ${esc(c.t.n)}</span>`:`<span class="lose">Не повезло. Скины сгорели.</span>`;
+  $("#wheel").classList.add(win?"win":"lose");win?Snd.win():Snd.lose();
+  sel.clear();if(win)tgt=null;busy=false;lock=null;render();
 };
+// ---- ticks на колесе
+$("#ticks").innerHTML=Array.from({length:60},(_,i)=>`<line x1="100" y1="5" x2="100" y2="${i%5?8:11}" transform="rotate(${i*6} 100 100)"/>`).join("");
+
+// ---- настройки (шестерёнка)
+const modal=$("#modal"),perr=m=>{$("#perr").textContent=m||""};
+const updIcon=()=>{$("#snd").textContent=Snd.on&&Snd.vol>0?"🔊":"🔇"};
+function renderSet(){
+  $("#plist").innerHTML=presets.map((m,i)=>`<div class="prow"><input type="text" inputmode="decimal" value="${m}" data-pi="${i}" aria-label="Множитель"><button class="btn d" data-del="${i}" aria-label="Удалить">✕</button></div>`).join("");
+  $("#vol").value=Math.round(Snd.vol*100);$("#sndon").checked=Snd.on;
+}
+const commit=()=>{presets=norm(presets);savePresets();renderSet();renderPresets()};
+const rangeMsg=()=>`Допустимо от x${CFG.minM} до x${CFG.maxM}`;
+$("#gear").onclick=()=>{perr();renderSet();modal.hidden=false;Snd.modal()};
+const closeSet=()=>{modal.hidden=true;Snd.modal()};
+modal.addEventListener("click",e=>{if(e.target===modal||e.target.closest("[data-close]"))closeSet()});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.hidden)closeSet()});
+$("#plist").onclick=e=>{const b=e.target.closest("[data-del]");if(!b)return;if(presets.length<=1)return perr("Нужен хотя бы один пресет");presets.splice(+b.dataset.del,1);perr();commit()};
+$("#plist").onchange=e=>{const i=+e.target.dataset.pi,v=num(e.target.value);if(!okM(v)){perr(rangeMsg());return renderSet()}presets[i]=v;perr();commit()};
+$("#paddb").onclick=()=>{const v=num($("#padd").value);
+  if(!okM(v))return perr(rangeMsg());
+  if(presets.length>=CFG.maxPresets)return perr("Максимум пресетов: "+CFG.maxPresets);
+  if(presets.some(m=>Math.abs(m-v)<.005))return perr("Такой множитель уже есть");
+  presets.push(v);$("#padd").value="";perr();commit()};
+$("#cmb").onclick=()=>{const v=num($("#cm").value);if(!okM(v))return perr(rangeMsg());
+  mult=v;perr();closeSet();if(sumSel()>0){autoTarget()}renderUp();toast("Множитель x"+v)};
+$("#ccb").onclick=()=>{const v=num($("#cc").value),m=(1-CFG.edge)*100/v,lo=(1-CFG.edge)*100/CFG.maxM;
+  if(!(v>=CFG.minP&&v<=CFG.maxP&&okM(m)))return perr(`Допустимо от ${Math.max(CFG.minP,lo).toFixed(2)}% до ${CFG.maxP}%`);
+  mult=m;perr();closeSet();if(sumSel()>0){autoTarget()}renderUp();toast("Целевой шанс "+v+"%")};
+$("#preset-reset").onclick=()=>{presets=CFG.defPresets.slice();mult=0;savePresets();perr();renderSet();renderUp()};
+$("#sndon").onchange=e=>{Snd.setOn(e.target.checked);updIcon()};
+$("#vol").oninput=e=>{Snd.setVol(e.target.value/100);updIcon()};
+$("#snd").onclick=()=>{Snd.setOn(!Snd.on);updIcon()};
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(b&&!b.matches("[data-buy],[data-sell],#go,#snd"))Snd.click()});
+updIcon();
 
 function render(){
   $("#bal").textContent=(Math.round(st.bal*100)/100).toLocaleString("ru-RU");
